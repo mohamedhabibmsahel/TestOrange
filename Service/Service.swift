@@ -6,7 +6,7 @@
 //
 import Foundation
 
-class APIService :  NSObject {
+class Service :  NSObject {
     
     private let sourcesURL =  "https://api.opentripmap.com/0.1/en/places/"
     
@@ -21,6 +21,31 @@ class APIService :  NSObject {
             }
         }.resume()
     }
+    func getallplaces(point : Point ,callback: @escaping (Bool,Places?)->Void){
+        
+         
+         let jsonUrlString = sourcesURL + "radius?apikey=5ae2e3f221c38a28845f05b6e1e72f6e6fae9bc6a9473af209e333f9&radius=\(UserDefaults.standard.string(forKey: "radius")!)&lon=\(point.lon)&lat=\(point.lat)&rate=3&format=json"
+             guard let url = URL(string: jsonUrlString) else
+             { return }
+
+             URLSession.shared.dataTask(with: url) { (data, response, err) in
+
+                 guard let data =  data else{ return }
+
+                 do {
+
+                     let allPlaces = try JSONDecoder().decode(Places.self, from: data)
+                    
+                     
+                 callback(true,allPlaces)
+                     
+          
+                 } catch let jsonErr {
+                     print("Error serializing json:", jsonErr)
+                 }
+
+             }.resume()
+     }
     
     func getPlaceDetails(id : String, completion : @escaping (DetailPlace?) -> ()){
         let urlComps = URLComponents(string: sourcesURL + "xid/\(id)?apikey=5ae2e3f221c38a28845f05b6e1e72f6e6fae9bc6a9473af209e333f9")
